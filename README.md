@@ -31,3 +31,40 @@ You can check up the request body and response content detail here.
 
 ![Analyzer Area](/documents/images/ss3.png)
 
+## Install
+### Quick Launch
+1. Install Active MQ for request log collector usage. The default user and password would be admin/admin.
+2. Locate the tomcat you want to monit, copy install/request-monitor.jar to the tomcat's lib/ directory. For example (tomcat/lib/)
+3. Put install/monitor.war into tomcat's webapps directory. For example (tomcat/webapps/)
+4. Change config tomcat's config file web.xml(tomcat/conf/), add log collector filter
+
+```
+......
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.htm</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+      <filter>
+     <filter-name>My Filter</filter-name>
+     <filter-class>com.benhouse.monitor.BasicHttpFilter</filter-class>
+  </filter>
+  
+  <filter-mapping>
+     <filter-name>My Filter</filter-name>
+     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+</web-app>
+```
+
+Now it's done!
+
+Start your tomcat, open your browser and visit url
+'ip:port/monitor'
+such as localhost:8080/monitor
+
+
+
+
