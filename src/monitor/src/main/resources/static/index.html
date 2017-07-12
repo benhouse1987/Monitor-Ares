@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Request Monitor</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="cover.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]>
+    <script src="assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="assets/js/ie-emulation-modes-warning.js"></script>
+    <script src="jquery-3.2.1.min.js"></script>
+    <!-- 引入 ECharts 文件 -->
+    <script src="echarts.common.min.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body style="background-color: #eee;text-align: left;color: #666;
+    text-shadow: 0 0;">
+
+
+<div class="inner cover">
+
+    <h1 style="    margin-left: 10%;    margin-bottom: 20px;">Request Monitor</h1>
+
+    <div class="form-inline"
+         style="margin-left: 15%;color: #444;padding-left: 10px;padding-right: 10px;text-shadow: 0 0 #000">
+
+        <div class="form-group">
+            <label for="days" style="margin-left: 2px;margin-right: 10px;">Date Range</label>
+            <select class="form-control" id="days">
+                <option value="1">Within 1 Day</option>
+                <option value="2">Within 2 Days</option>
+                <option value="3">Within 3 Days</option>
+                <option value="4">Within 4 Days</option>
+                <option value="5">Within 5 Days</option>
+                <option value="6">Within 6 Days</option>
+                <option value="7">Within 7 Days</option>
+            </select>
+
+        </div>
+
+        <div class="form-group">
+            <label for="x"> X Axis</label>
+            <select class="form-control" style="margin-left: 2px;margin-right: 10px;" id="x">
+                <option value="requestUrl">Request Path</option>
+                <option value="responseStatus">Response Status</option>
+                <option value="longRequest">Long Time Request</option>
+                <option value="dateHour">Request Time</option>
+            </select>
+
+        </div>
+
+        <div class="form-group">
+            <label for="legend">Series</label>
+
+            <select class="form-control" style="margin-left: 2px;margin-right: 10px;" id="legend">
+                <option value="requestUrl">Request Path</option>
+                <option value="responseStatus">Response Status</option>
+                <option value="longRequest">Long Time Request</option>
+                <option value="dateHour">Request Time</option>
+            </select>
+
+        </div>
+
+        <div class="form-group">
+            <label for="y">Y Axis</label>
+            <select class="form-control" style="margin-left: 2px;margin-right: 10px;" id="y">
+                <option value="count">Request Count</option>
+                <option value="avg">Average Cost</option>
+                <option value="min">Min Cost</option>
+                <option value="max">Max Cost</option>
+            </select>
+
+        </div>
+        <button class="btn btn-default" style="margin-left: 2px;margin-right: 10px;" style="margin-left: 20px" onclick="analyze()">Search</button>
+    </div>
+    <div id="main" style="width: 100%;height:400px;"></div>
+
+
+    <div style="margin-left: 20px;margin-right: 20px;">
+    <table id="logTable" class="display"  cellspacing="0" width="100%">
+
+    </table>
+    </div>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+<script src="../../dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+<script type="text/javascript">
+
+
+    $("#days")[0].value = 7;
+    // 基于准备好的dom，初始化echarts实例
+
+    var myChart = echarts.init(document.getElementById('main'));
+    myChart.on('click', function (params) {
+        // 控制台打印数据的名称
+        console.log('clicked!');
+        console.log(x + ":" + params.name);
+        var x = $("#x")[0].value;
+        var y = $("#y")[0].value;
+        var legend = $("#legend")[0].value;
+        var criteria = {};
+        criteria[x] = params.name;
+
+        refresh(legend, y, x, criteria);
+
+        var query = JSON.stringify({
+            "days": $("#days")[0].value,
+            "criteria": criteria
+        });
+
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "api/search",
+            "method": "POST",
+            "headers": {
+                "content-type": "application/json",
+                "cache-control": "no-cache"
+            },
+            "processData": false,
+            "data": query
+        };
+
+        $.ajax(settings).done(function (response) {
+            table.clear();
+            table.rows.add(response);
+            table.draw();
+
+        });
+
+
+    });
+
+    var table = $('#logTable').DataTable({
+        columns: [
+            {title: "Request Id", "data": "requestId"},
+            {title: "Request Path", "data": "requestUrl"},
+            {title: "Cost", "data": "duration"},
+            {title: "Request Date", "data": "date"},
+            {title: "Request Time", "data": "dateHour"},
+            {title: "Begin Time", "data": "beginTime"},
+            {title: "End Time", "data": "endTime"},
+            {title: "Is Long Request", "data": "longRequest"},
+            {title: "Response Type", "data": "responseContentType"},
+            {title: "Response Status", "data": "responseStatus"}
+
+
+        ]
+    });
+    ;
+
+    //去重&排序
+    function uniqueArray(array) {
+        var res = [];
+        var json = {};
+        for (var i = 0; i < array.length; i++) {
+            if (!json[array[i]]) {
+                res.push(array[i]);
+                json[array[i]] = 1;
+            }
+        }
+        return res;
+    }
+
+
+    function analyze() {
+        var x = $("#x")[0].value;
+        var y = $("#y")[0].value;
+        var legend = $("#legend")[0].value;
+        refresh(x, y, legend, null);
+    }
+
+
+    function refresh(x, y, legend, criteria) {
+
+
+        var mlegend = [];
+        var mxAxis = [];
+        var resultset = [];
+        var result = [];
+        var option = {};
+
+
+        var query = JSON.stringify({
+            "groupKey": x + "@@" + legend, "days": $("#days")[0].value,
+            "criteria": criteria
+        });
+
+
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "analyze",
+            "method": "POST",
+            "headers": {
+                "content-type": "application/json",
+                "cache-control": "no-cache",
+                "postman-token": "3f1c81c2-98b3-ee53-2225-19bff2514dc0"
+            },
+            "processData": false,
+            "data": query
+        };
+
+        $.ajax(settings).done(function (response) {
+
+            for (i = 0; i < response.length; i++) {
+
+                var keys = response[i]["_id"].split("@@");
+
+                mxAxis[i] = keys[1];
+                mlegend[i] = keys[2];
+                if (!result[mlegend[i]]) {
+                    result[mlegend[i]] = [];
+                }
+                //result[mlegend[i]].push(response[i][y]);
+                result[mlegend[i]][mxAxis[i]] = response[i][y];
+
+
+            }
+            mxAxis = uniqueArray(mxAxis);
+            mlegend = uniqueArray(mlegend);
+            mxAxis.sort();
+
+            mseirals = [];
+            for (i = 0; i < mlegend.length; i++) {
+
+                var xData = [];
+                for (j = 0; j < mxAxis.length; j++) {
+                    xData.push(result[mlegend[i]][mxAxis[j]]);
+
+                }
+
+                mseirals.push(
+                        {
+                            name: mlegend[i],
+                            type: 'bar',
+                            data: xData
+                        }
+                )
+
+            }
+
+
+            console.log(mlegend);
+
+
+            // 指定图表的配置项和数据
+            option = {
+                toolbox: {
+                    show: true,
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: 'none'
+                        },
+                        dataView: {readOnly: false},
+                        magicType: {type: ['line', 'bar']},
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    confine: true,
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    data: mlegend,
+                    orient: 'vertical',
+                    show: false
+                },
+                grid: {
+
+                    containLabel: true,
+                    left: '10%',
+                    bottom: '10%'
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: mxAxis
+
+
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: mseirals
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option, true);
+        });
+    }
+</script>
+</body>
+</html>
