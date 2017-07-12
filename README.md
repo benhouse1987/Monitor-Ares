@@ -1,6 +1,6 @@
 # Ares
 
-Ares is  a request monitor which can help us to have a whole picture of our system live running status.
+Ares is  a request monitor which can help us to get a whole picture of our system live running status.
 
 ## Features
 ### Request Analyzer
