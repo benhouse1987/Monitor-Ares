@@ -4,11 +4,12 @@ Ares is  a request monitor which can help us to get a whole picture of our syste
 
 ## Features
 ### Request Analyzer
-Use Ares Request Analyzer to help you analyze your system requests.
+Use Ares Request Analyzer to help you analyze your system requests!
 
 ![Analyzer Area](/documents/images/ss1.png)
 
-The analyzer can filter request datas by date range, and you can choose request dimentions which you care about to analyze including the following:
+The analyzer can filter request datas by date range, and you can choose request dimentions which you care about to analyze.
+Dimentions including the following:
 
 ```
 1. Request Path

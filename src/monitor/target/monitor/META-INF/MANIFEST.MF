@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Implementation-Title: monitor
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: yunfeima
+Implementation-Vendor-Id: com.benhouse.monitor
+Created-By: IntelliJ IDEA
+Build-Jdk: 1.8.0_101
+Main-Class: ${start-class}
+

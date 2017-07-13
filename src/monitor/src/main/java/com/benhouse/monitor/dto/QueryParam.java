@@ -7,8 +7,13 @@ import java.util.Map;
  * Created by yunfeima on 2017/6/19.
  */
 public class QueryParam {
+
+    //analyze dimensions
     private String groupKey;
+    //log within days
     private int days;
+    //log of fileDate;
+    private String fileDate;
     private Map<String,Object> criteria;
     private int page;
     private int pageSize;
@@ -51,5 +56,13 @@ public class QueryParam {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getFileDate() {
+        return fileDate;
+    }
+
+    public void setFileDate(String fileDate) {
+        this.fileDate = fileDate;
     }
 }

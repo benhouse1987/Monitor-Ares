@@ -57,9 +57,9 @@ public class LogCacher {
 
 
 
-    public  List<Map<String,Object>> read(String logDate){
+    public  List<Map<String,Object>> read(String fileName){
         //读取数据
-        String path = homePath + monitorPath+logDate+".reqdtl"; // 路径
+        String path = homePath + monitorPath+fileName+".reqdtl"; // 路径
         File f = new File(path);
         if (!f.exists()) {
             System.out.println(path + " not exists");

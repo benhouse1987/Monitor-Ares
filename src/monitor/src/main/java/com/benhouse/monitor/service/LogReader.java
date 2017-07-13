@@ -24,4 +24,10 @@ public class LogReader {
         return logCacher.getLog(days);
     }
 
+
+    public  List<Map<String,Object>> readDetail(String fileDate){
+        return logCacher.read(fileDate+"-detail");
+    }
+
+
 }

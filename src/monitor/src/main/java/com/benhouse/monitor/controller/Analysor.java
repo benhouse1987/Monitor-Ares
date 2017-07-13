@@ -1,6 +1,8 @@
 package com.benhouse.monitor.controller;
 
+import com.benhouse.monitor.dto.AnalyzeResult;
 import com.benhouse.monitor.dto.QueryParam;
+import com.benhouse.monitor.dto.RequestDetail;
 import com.benhouse.monitor.service.LogFilter;
 import com.benhouse.monitor.service.LogReader;
 import com.caffinc.jaggr.core.Aggregation;
@@ -42,15 +44,16 @@ public class Analysor {
 
     @RequestMapping("analyze")
     @ResponseBody
-    public List<Map<String, Object>> analyze(@RequestBody QueryParam queryParam, HttpServletRequest httpServletRequest) {
-        List<Map<String, Object>> data =logReader.read(queryParam.getDays());
+    public AnalyzeResult analyze(@RequestBody QueryParam queryParam) {
+        AnalyzeResult result = new AnalyzeResult();
+        List<Map<String, Object>> data = logReader.read(queryParam.getDays());
         List<Map<String, Object>> tmpdata = null;
 
 
-        if(queryParam.getCriteria()!=null) {
-            tmpdata = logFilter.filter(data, queryParam.getCriteria(),queryParam.getPage(),queryParam.getPageSize());
-        }else{
-            tmpdata=data;
+        if (queryParam.getCriteria() != null) {
+            tmpdata = logFilter.filter(data, queryParam.getCriteria(), queryParam.getPage(), queryParam.getPageSize());
+        } else {
+            tmpdata = data;
         }
 
         Aggregation aggregation = new AggregationBuilder()
@@ -63,10 +66,24 @@ public class Analysor {
                 .getAggregation();
 
 
-        tmpdata = aggregation.aggregateCombined(tmpdata);
+        result.setDetailResult(tmpdata);
+        result.setGridResult(aggregation.aggregateCombined(tmpdata));
+        return result;
+    }
 
 
-        return tmpdata;
+    @RequestMapping("detail")
+    @ResponseBody
+    public RequestDetail getRequestDetail(@RequestBody QueryParam queryParam) {
+        RequestDetail requestDetail=new RequestDetail();
+        List<Map<String, Object>> data = logReader.readDetail(queryParam.getFileDate());
+        List<Map<String, Object>> requestLog =
+                logFilter.filter(data, queryParam.getCriteria(), queryParam.getPage(), queryParam.getPageSize());;
+        requestDetail.setPostContent(requestLog.get(0).get("postContent").toString());
+        requestDetail.setResponseContent(requestLog.get(0).get("response").toString());
+
+        return  requestDetail;
+
     }
 
 
