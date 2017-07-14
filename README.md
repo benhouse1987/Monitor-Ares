@@ -2,6 +2,11 @@
 
 Ares is  a request monitor which can help us to get a whole picture of our system live running status.
 
+# Live Show
+You can have a quick look of Ares from here
+
+[Ares Monitor](http://sugarclub.oss-cn-shanghai.aliyuncs.com/monitor.html)
+
 ## Features
 ### Request Analyzer
 Use Ares Request Analyzer to help you analyze your system requests!
